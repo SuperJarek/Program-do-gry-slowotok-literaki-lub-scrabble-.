@@ -1,16 +1,17 @@
 package com.company.findingWordsMechanism;
 
-import java.util.ArrayList;
-
 /**
  * Created by Jarek on 2017-09-23.
  */
-public class Tree<T> {
-    private Node<T> root;
+public class Tree {
+    private Node root;
 
-    public Tree (T rootData){
-        root = new Node<T>();
-        root.data = rootData;
-        root.children = new ArrayList<Node<T>>();
+    public Tree (){
+        root = root.createRoot();
+    }
+
+    public void addWord(String word)
+    {
+        root.checkNextNode(word);
     }
 }
