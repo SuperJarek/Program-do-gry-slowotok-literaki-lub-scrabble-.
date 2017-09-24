@@ -10,8 +10,8 @@ public class Tree {
         root = root.createRoot();
     }
 
-    public void addWord(String word)
+    public void addWord(int indexes[])
     {
-        root.checkNextNode(word);
+        root.checkNextNode(indexes);
     }
 }

@@ -46,48 +46,34 @@ public class Node {
         depth = -1; // Root nie zawiera żadnej litery, więc jego indeks/głebokość musi być poza tablicą wyrazu ENG!!
     }
 
-    public void checkNextNode(String word){
-        if(isFinalLeter(word)){ // !!! poziom abstrakcj
+    public void checkNextNode(int indexes[]){
+        if(isFinalLetter(indexes)){
             markWord();
             return;
         }
         else {
-            findNextNode(word);
+            findNextNode(indexes);
         }
     }
-    private boolean isFinalLeter(String word){
-        return depth == word.length();
+    private boolean isFinalLetter(int indexes[]){
+        return depth == indexes.length;
     }
     private void markWord()
     {
         isWord = true;
     }
-    private void findNextNode(String word)
+    private void findNextNode(int indexes[])
     {
-        char nextLetterFromWord = word.charAt(depth + 1); // już nie ten poziom abstrakcji, zmień
-        int index = createIndexFromLetter(nextLetterFromWord);
-        Node childNode = children[index];
+        int nextIndex = getNextIndex(indexes);
+        Node childNode = children[nextIndex];
 
         if (childNode.isNull()){
-           childNode = createChildNode(index, this);
+           childNode = createChildNode(nextIndex, this);
         }
-        childNode.checkNextNode(word);
+        childNode.checkNextNode(indexes);
     }
-    private int createIndexFromLetter(char letter){
-        if(isLetterFromLatinAlphabet(letter)) {
-            return createIndexFromLatinLetter(letter);
-        }
-        else
-            return createIndexFromSpecialLetter(letter);
-    }
-    private boolean isLetterFromLatinAlphabet(char letter){
-        return (letter >= 'a' && letter <= 'z');
-    }
-    private int createIndexFromLatinLetter(char letter){
-        return letter - 'a';
-    }
-    private int createIndexFromSpecialLetter(char letter){ // TO DO!
-        return 0;
+    private int getNextIndex(int indexes[]) {
+        return indexes[depth + 1];
     }
     private boolean isNull() {
         return this == null;
