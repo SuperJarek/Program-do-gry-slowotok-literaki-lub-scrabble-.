@@ -14,7 +14,7 @@ public class Node {
     int depth;
     List<Node> children;
     int index;
-    final static int NUMBER_OF_LETTERS = 50; // Not sure how many polish alphabet has
+    final static int NUMBER_OF_LETTERS = 40; // Not sure how many polish alphabet has
 
     public int getDepth() {
         return depth;
