@@ -1,16 +1,14 @@
 package com.company.findingWordsMechanism;
 
-import java.util.List;
-
 /**
  * Created by Jarek on 2017-09-23.
  */
 public class Node {
     boolean isWord;
-    Node[] children;
     Node parent;
     int depth;
-    final static int QUANTITY_OF_LETTERS = 50; // Not sure how many polish alphabet has
+    Node[] children;
+    final static int NUMBER_OF_LETTERS = 50; // Not sure how many polish alphabet has
 
     public int getDepth() {
         return depth;
@@ -19,7 +17,7 @@ public class Node {
         this.parent = parent;
     }
 
-    public Node createNode(Node parent)
+    static public Node createNode(Node parent)
     {
         return new Node(parent);
     }
@@ -28,18 +26,19 @@ public class Node {
         isWord = false;
         this.parent = parent;
         setDepthFromParent(parent);
-        children = new Node[QUANTITY_OF_LETTERS];
+        children = new Node[NUMBER_OF_LETTERS];
     }
     private void setDepthFromParent(Node parent) {
         this.depth = parent.getDepth() + 1;
     }
 
-    public Node createRoot()
+    public static Node createRoot()
     {
         return new Node();
     }
     private Node()
     {
+        children = new Node[NUMBER_OF_LETTERS];
         setDepthForRoot(depth);
     }
     private void setDepthForRoot(int depth){
@@ -56,7 +55,7 @@ public class Node {
         }
     }
     private boolean isFinalLetter(int indexes[]){
-        return depth == indexes.length;
+        return depth == indexes.length - 1; // KOMENT RÓŻNE POZIOMY ABSTRAKCJI
     }
     private void markWord()
     {
@@ -67,17 +66,27 @@ public class Node {
         int nextIndex = getNextIndex(indexes);
         Node childNode = children[nextIndex];
 
-        if (childNode.isNull()){
+        if (isNodeNull(childNode)){
            childNode = createChildNode(nextIndex, this);
         }
         childNode.checkNextNode(indexes);
     }
+
+    private boolean isNodeNull(Node node) {
+        return node == null;
+    }
+
     private int getNextIndex(int indexes[]) {
-        return indexes[depth + 1];
+        if(isRoot())
+            return indexes[0];
+        else
+            return indexes[depth + 1];
     }
-    private boolean isNull() {
-        return this == null;
+
+    private boolean isRoot() {
+        return depth == -1;
     }
+
     private Node createChildNode(int index, Node parent){
         children[index] = createNode(parent);
         return children[index];
