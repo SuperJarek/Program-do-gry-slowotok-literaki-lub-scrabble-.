@@ -7,7 +7,7 @@ public class Tree {
     private Node root;
 
     public Tree (){
-        root = root.createRoot();
+        root = Node.createRoot();
     }
 
     public void addWord(int indexes[])
