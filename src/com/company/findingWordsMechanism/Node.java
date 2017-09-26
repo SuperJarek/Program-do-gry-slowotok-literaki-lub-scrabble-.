@@ -1,5 +1,8 @@
 package com.company.findingWordsMechanism;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Jarek on 2017-09-23.
  */
@@ -7,7 +10,7 @@ public class Node {
     boolean isWord;
     Node parent;
     int depth;
-    Node[] children;
+    List<Node> children;
     final static int NUMBER_OF_LETTERS = 50; // Not sure how many polish alphabet has
 
     public int getDepth() {
@@ -26,10 +29,15 @@ public class Node {
         isWord = false;
         this.parent = parent;
         setDepthFromParent(parent);
-        children = new Node[NUMBER_OF_LETTERS];
+        children = new ArrayList<Node>();
+        addEmptyChildren();
     }
     private void setDepthFromParent(Node parent) {
         this.depth = parent.getDepth() + 1;
+    }
+    private void addEmptyChildren(){
+        for(int i=0; i<NUMBER_OF_LETTERS; i++ )
+            children.add(null);
     }
 
     public static Node createRoot()
@@ -38,8 +46,9 @@ public class Node {
     }
     private Node()
     {
-        children = new Node[NUMBER_OF_LETTERS];
         setDepthForRoot(depth);
+        children = new ArrayList<Node>();
+        addEmptyChildren();
     }
     private void setDepthForRoot(int depth){
         depth = -1; // Root nie zawiera żadnej litery, więc jego indeks/głebokość musi być poza tablicą wyrazu ENG!!
@@ -64,7 +73,7 @@ public class Node {
     private void findNextNode(int indexes[])
     {
         int nextIndex = getNextIndex(indexes);
-        Node childNode = children[nextIndex];
+        Node childNode = children.get(nextIndex);
 
         if (isNodeNull(childNode)){
            childNode = createChildNode(nextIndex, this);
@@ -77,18 +86,11 @@ public class Node {
     }
 
     private int getNextIndex(int indexes[]) {
-        if(isRoot())
-            return indexes[0];
-        else
             return indexes[depth + 1];
     }
 
-    private boolean isRoot() {
-        return depth == -1;
-    }
-
     private Node createChildNode(int index, Node parent){
-        children[index] = createNode(parent);
-        return children[index];
+        Node childNode = createNode(parent);
+        return childNode;
     }
 }

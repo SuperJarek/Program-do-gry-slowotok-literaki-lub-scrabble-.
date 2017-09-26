@@ -12,13 +12,7 @@ import java.util.Scanner;
 public class TreeLoader {
     static private int START_OF_TABLE = 0;
     static private int NUMBER_OF_LETTERS_IN_LATIN_ALPHABET = 26;
-    /*    public void loadTree(Tree tree)
-        {
-            forEachWordFromList{
-                translateToIndexes();
-            }
-            eachArrayOfIndexesLoadToATree();
-        }*/
+
     public void loadTree(Tree tree) {
         try {
             FileInputStream fileStream = new FileInputStream("words/slowa.txt");
