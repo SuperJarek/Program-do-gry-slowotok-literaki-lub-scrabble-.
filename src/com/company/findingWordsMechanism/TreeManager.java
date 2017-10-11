@@ -1,15 +1,10 @@
 package com.company.findingWordsMechanism;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.IntStream;
 
 /**
  * Created by Jarek on 2017-09-24.
@@ -32,29 +27,30 @@ public class TreeManager {
         Scanner scanner = new Scanner(fileStream);
         while (scanner.hasNextLine()) {
             String word = scanner.nextLine();
-            int indexes[] = translateWordToIndexes(word);
-            tree.addWord(indexes);
+            int path[] = translateStringToPath(word); //translation of letter in word to path which consists indexes of next nodes
+            tree.loadPath(path);
+            System.out.println(word);
         }
         scanner.close();
     }
 
-    private int[] translateWordToIndexes(String word) {
-        int indexes[] = initializeTableForIndexes(word);
+    private int[] translateStringToPath(String word) {
+        int path[] = new int[word.length()];
         int pointer = START_OF_TABLE;
-        while (pointer < word.length()) {
-            char letter = word.charAt(pointer);
-            indexes[pointer] = translateLetterToIndex(letter);
-            pointer++;
+        char[] charArray = word.toCharArray();
+        for(char letter: charArray){
+            path[pointer++] = translateLetterToIndex(letter);
         }
-        return indexes;
+        return path;
     }
 
     private int translateLetterToIndex(char letter) {
         int index;
         if (isLatin(letter)) {
             index = latinLetterTranslation(letter);
-        } else
+        } else {
             index = specialLetterTranslation(letter);
+        }
         return index;
     }
 
@@ -76,44 +72,53 @@ public class TreeManager {
                 return NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 2; //ę
             case 0x0142:
                 return NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 3; //ł
-            case 0x0114:
+            case 0x0144:
                 return NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 4; //ń
             case 0x00f3:
                 return NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 5; //ó
             case 0x015b:
                 return NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 6; //ś
-            case 0x017c:
+            case 0x017a:
                 return NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 7; //ź
-            case 0x0104:
+            case 0x017c:
                 return NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 8; //ż
             default:
                 return NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 9; //garbage
         }
     }
 
-    private int[] initializeTableForIndexes(String word) {
-        int length = word.length();
-        return new int[length];
-    }
-
     private void printError(Exception e) {
         System.err.println("Error: " + e.getMessage());
     }
 
-    public List<String> findWords(Tree tree, String randomLetters) {
-        List<Integer> randomIndexes = getIndexesFromString(randomLetters);
-        List<int[]> indexesFromWords = tree.findWords(randomIndexes);
-        List<String> words = translateIndexesListToStringList(indexesFromWords);
+
+    public List<String> getWordList(Tree tree, String randomLetters) {
+        List<Integer> randomIndexes = getIndexesFromWord(randomLetters);
+        List<int[]> paths = tree.getPaths(randomIndexes);
+        List<String> words = translatePathListToStringList(paths);
+
+        words.sort((w1, w2) -> {
+            if(w1.length() > w2.length()){
+                return 1;
+            }
+            else if(w1.length() < w2.length()){
+                return  -1;
+            }
+            else{
+                return 0;
+            }
+        });
+
         return words;
     }
 
-    private List<Integer> getIndexesFromString(String string) {
-        int[] intArray = translateWordToIndexes(string);
-        Integer[] integerArray = Arrays.stream( intArray ).boxed().toArray( Integer[]::new );
+    private List<Integer> getIndexesFromWord(String string) {
+        int[] intArray = translateStringToPath(string);
+        Integer[] integerArray = Arrays.stream( intArray ).boxed().toArray( Integer[]::new ); // int array to Integer array
         return new ArrayList<>(Arrays.asList(integerArray));
     }
 
-    private List<String> translateIndexesListToStringList(List<int[]> indexesList) {
+    private List<String> translatePathListToStringList(List<int[]> indexesList) {
         List<String> stringList = new ArrayList<String>();
         for (int[] indexes : indexesList) {
             String string = translateIndexesToString(indexes);
@@ -132,10 +137,12 @@ public class TreeManager {
     }
 
     private char translateIndexToCharacter(int index) {
-        if(isLatinIndex(index))
+        if(isLatinIndex(index)) {
             return latinIndexTranslation(index);
-        else
+        }
+        else {
             return specialIndexTranslation(index);
+        }
 
     }
 
@@ -149,7 +156,7 @@ public class TreeManager {
 
     private char specialIndexTranslation(int index){
         switch (index) {
-            case NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 0:
+            case NUMBER_OF_LETTERS_IN_LATIN_ALPHABET:
                 return 0x0105; //ą
             case NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 1:
                 return 0x0107; //ć
@@ -158,15 +165,15 @@ public class TreeManager {
             case NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 3:
                 return 0x0142; //ł
             case NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 4:
-                return 0x0114; //ń
+                return 0x0144; //ń
             case NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 5:
                 return 0x00f3; //ó
             case NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 6:
                 return 0x015b; //ś
             case NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 7:
-                return 0x017c; //ź
+                return 0x017a; //ź
             case NUMBER_OF_LETTERS_IN_LATIN_ALPHABET + 8:
-                return 0x0104; //ż
+                return 0x017c; //ż
             default:
                 return ' '; //garbage
         }

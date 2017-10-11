@@ -8,136 +8,105 @@ import java.util.Set;
 /**
  * Created by Jarek on 2017-09-23.
  */
-public class Node {
-    boolean isWord;
-    Node parent;
-    int depth;
-    List<Node> children;
-    int index;
-    final static int NUMBER_OF_LETTERS = 40; // Not sure how many polish alphabet has
 
-    public int getDepth() {
+public class Node {
+    /* Each node holds one letter of the word, the next letter of the word
+    is placed in the child of this node, since children are kept in arrayList,
+    letters are translated to indexes of arrayList, each letter has unique index
+    Depth of nodes defines the index of letter in a string.
+    Nodes which contains end of some word, are marked by "isWord".
+    Root doesn't hold any index.
+//    Root in finding/adding a word operates on array called "indexes",
+//    which is a word translated to indexes.
+    */
+    private int index;
+    private int depth;
+    private boolean endOfPath;
+    private Node parent;
+    private List<Node> children;
+
+
+    private static int NUMBER_OF_LETTERS = 36; // Number of letters in polish alphabet
+    static int ROOT_DEPTH = -1; // Root depth should out of range of array with a word
+
+    private int getDepth() {
         return depth;
     }
 
-    public void setParent(Node parent) {
-        this.parent = parent;
-    }
-
-    static public Node createNode(Node parent, int index) {
-        return new Node(parent, index);
-    }
-
     private Node(Node parent, int index) {
-        isWord = false;
-        this.parent = parent;
-        setDepthFromParent(parent);
-        children = new ArrayList<Node>();
-        addEmptyChildren();
         this.index = index;
-    }
+        depth = parent.getDepth() + 1;
+        endOfPath = false;
+        this.parent = parent;
+        children = new ArrayList<>();
+        addEmptyChildren();
 
-    private void setDepthFromParent(Node parent) {
-        this.depth = parent.getDepth() + 1;
+        parent.children.set(index, this);
     }
 
     private void addEmptyChildren() {
-        for (int i = 0; i < NUMBER_OF_LETTERS; i++)
+        for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
             children.add(null);
+        }
     }
 
-    public static Node createRoot() {
-        return new Node();
-    }
 
-    private Node() {
-        setDepthForRoot();
+    public Node() {
+        depth = ROOT_DEPTH;
         children = new ArrayList<Node>();
         addEmptyChildren();
     }
 
-    private void setDepthForRoot() {
-        depth = -1; // Root nie zawiera żadnej litery, więc jego indeks/głebokość musi być poza tablicą wyrazu ENG!!
+
+    public void loadPath(int path[]) {
+        if (isEndOfPath(path)) {
+            endOfPath = true;
+        }else { // ensures that path exists in tree - creates necessary node if not
+            int nextIndex = path[depth + 1];
+            Node nextNode = children.get(nextIndex);
+            if (nextNode == null) {
+                nextNode = new Node(this, nextIndex);
+            }
+            nextNode.loadPath(path);
+        }
     }
 
-    public void addWord(int indexes[]) {
-        if (isFinalLetter(indexes)) {
-            markWord();
+    private boolean isEndOfPath(int path[]) {
+        return depth == path.length - 1; // is depth of Node equal last index of path
+    }
+
+
+    /*Find paths containing indexes from randomIndexes list only.
+    Same index can appear in path maximum as many times as it does in randomIndexes list. */
+    public void findPaths(List<Integer> randomIndexes, List<int[]> paths) {
+        if (endOfPath) {
+            addPathToList(paths);
+        } // Check if there is longer path
+        findPathsInNextNode(randomIndexes, paths);
+    }
+
+    private void addPathToList(List<int[]> paths) {
+        int[] path = new int[depth + 1];
+        composePath(path);
+        paths.add(path);
+    }
+
+    private void composePath(int[] path) {
+        if (depth == ROOT_DEPTH) {
             return;
-        } else {
-            findNextNode(indexes);
         }
+        path[depth] = index;
+        parent.composePath(path);
     }
 
-    private boolean isFinalLetter(int indexes[]) {
-        return depth == indexes.length - 1; // Depth counts from 0, length counts from 1
-    }
-
-    private void markWord() {
-        isWord = true;
-    }
-
-    private void findNextNode(int indexes[]) {
-        int nextIndex = getNextIndex(indexes);
-        Node childNode = children.get(nextIndex);
-
-        if (isNodeNull(childNode)) {
-            childNode = createChildNode(nextIndex, this);
-            children.set(nextIndex, childNode);
-        }
-        childNode.addWord(indexes);
-    }
-
-    private boolean isNodeNull(Node node) {
-        return node == null;
-    }
-
-    private int getNextIndex(int indexes[]) {
-        return indexes[depth + 1];
-    }
-
-    private Node createChildNode(int index, Node parent) {
-        Node childNode = createNode(parent, index);
-        return childNode;
-    }
-
-    public void findWord(List<Integer> randomIndexes, List<int[]> indexesFromWords) {
-        if (isWord) {
-            addWordToList(indexesFromWords);
-        }
-        findWordInNextNode(randomIndexes, indexesFromWords);
-    }
-
-    private void addWordToList(List<int[]> indexesFromWords) {
-        int[] indexes = new int[getLengthOfIndexes()];
-        collectIndexes(indexes);
-        indexesFromWords.add(indexes);
-    }
-
-    private int getLengthOfIndexes() {
-        return depth + 1; //depth should be last index number
-    }
-
-    private void collectIndexes(int[] indexes) {
-        if (isRoot())
-            return;
-        indexes[depth] = index;
-        parent.collectIndexes(indexes);
-    }
-
-    private boolean isRoot() {
-        return depth == -1;
-    }
-
-    private void findWordInNextNode(List<Integer> randomIndexes, List<int[]> words) {
-
-        Set<Integer> uniqueIndexes = new HashSet<Integer>(randomIndexes);
-        for (Integer index : uniqueIndexes) {
-            List<Integer> newRandomIndexes = new ArrayList<Integer>(randomIndexes);
+    private void findPathsInNextNode(List<Integer> randomIndexes, List<int[]> paths) {
+        Set<Integer> uniqueRandomIndexes = new HashSet<>(randomIndexes);
+        for (Integer index : uniqueRandomIndexes) {
+            List<Integer> newRandomIndexes = new ArrayList<>(randomIndexes);
             newRandomIndexes.remove(index);
             Node nextNode = children.get(index);
-            if(nodeExists(nextNode)) {
-                nextNode.findWord(newRandomIndexes, words);
+            if (nextNode != null) {
+                nextNode.findPaths(newRandomIndexes, paths);
             }
         }
     }

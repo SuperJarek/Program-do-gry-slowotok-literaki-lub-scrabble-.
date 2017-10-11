@@ -10,17 +10,17 @@ import java.util.Set;
 public class Tree {
     private Node root;
 
-    public Tree (){
-        root = Node.createRoot();
+    public Tree() {
+        root = new Node();
     }
 
-    public void addWord(int indexes[])
-    {
-        root.addWord(indexes);
+    public void loadPath(int path[]) {
+        root.loadPath(path);
     }
-    public List<int[]> findWords(List<Integer> randomIndexes){
-        List<int[]> indexesFromWords = new ArrayList<int[]>();
-        root.findWord(randomIndexes, indexesFromWords);
-        return indexesFromWords;
+
+    public List<int[]> getPaths(List<Integer> randomIndexes) {
+        List<int[]> paths = new ArrayList<>();
+        root.findPaths(randomIndexes, paths);
+        return paths;
     }
 }
